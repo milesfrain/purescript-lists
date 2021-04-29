@@ -416,6 +416,7 @@ testCommon
     -- res = r.nubEq $ thing
   --assertEqual { actual: r.nubEq $ thing, expected: l [1, 2, 3, 4] }
   -- Todo - very confused why this won't work
+  assertEqual { actual: r.nubEq $ l [1, 2, 2, 3, 4, 1], expected: l [1, 2, 3, 4] }
   --assertEqual { actual: nubEq $ l [1, 2, 2, 3, 4, 1], expected: l [1, 2, 3, 4] }
 
   log "nubByEq should remove duplicate items from the collection using a supplied predicate"
