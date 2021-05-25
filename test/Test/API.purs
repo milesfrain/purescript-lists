@@ -10,8 +10,17 @@ import Data.Maybe (Maybe)
 import Data.Tuple (Tuple)
 import Data.Unfoldable (class Unfoldable)
 
+type MakeCollection c =
+  forall f a. Foldable f => f a -> c a
+
+type MakeCanEmptyCollection canEmpty =
+  forall f a. Foldable f => f a -> canEmpty a
+
+type MakeNonEmptyCollection nonEmpty =
+  forall f a. Foldable f => f a -> nonEmpty a
+
 type Common c =
-  { makeCollection :: forall f a. Foldable f => f a -> c a
+  { makeCollection :: MakeCollection c
 
   , concat :: forall a. c (c a) -> c a
   , concatMap :: forall a. forall b. (a -> c b) -> c a -> c b
@@ -53,10 +62,9 @@ type Common c =
   }
 
 type CommonDiffEmptiability c cInverse canEmpty nonEmpty cPattern =
-  { makeCollection :: forall f a. Foldable f => f a -> c a
-
-  , makeCanEmptyCollection :: forall f a. Foldable f => f a -> canEmpty a
-  , makeNonEmptyCollection :: forall f a. Foldable f => f a -> nonEmpty a
+  { makeCollection :: MakeCollection c
+  , makeCanEmptyCollection :: MakeCanEmptyCollection canEmpty
+  , makeNonEmptyCollection :: MakeNonEmptyCollection nonEmpty
 
   , catMaybes :: forall a. c (Maybe a) -> canEmpty a
   , drop :: forall a. Int -> c a -> canEmpty a
@@ -86,8 +94,8 @@ type CommonDiffEmptiability c cInverse canEmpty nonEmpty cPattern =
 }
 
 type OnlyCanEmpty c nonEmpty =
-  { makeCollection :: forall f a. Foldable f => f a -> c a
-  , makeNonEmptyCollection :: forall f a. Foldable f => f a -> nonEmpty a
+  { makeCollection :: MakeCollection c
+  , makeNonEmptyCollection :: MakeNonEmptyCollection nonEmpty
 
   -- These are the same function names as the NonEmpty versions,
   -- but the signatures are different and can't be merged in the
@@ -107,8 +115,8 @@ type OnlyCanEmpty c nonEmpty =
   }
 
 type OnlyNonEmpty c canEmpty =
-  { makeCollection :: forall f a. Foldable f => f a -> c a
-  , makeCanEmptyCollection :: forall f a. Foldable f => f a -> canEmpty a
+  { makeCollection :: MakeCollection c
+  , makeCanEmptyCollection :: MakeCanEmptyCollection canEmpty
 
   -- These are the same function names as the CanEmpty versions,
   -- but the signatures are different and can't be merged in the
@@ -129,7 +137,7 @@ type OnlyNonEmpty c canEmpty =
   }
 
 type OnlyStrict c =
-  { makeCollection :: forall f a. Foldable f => f a -> c a
+  { makeCollection :: MakeCollection c
 
   -- Same names, but different APIs (with Maybe)
   , alterAt :: forall a. Int -> (a -> Maybe a) -> c a -> Maybe (c a)
@@ -139,7 +147,7 @@ type OnlyStrict c =
   }
 
 type OnlyLazy c =
-  { makeCollection :: forall f a. Foldable f => f a -> c a
+  { makeCollection :: MakeCollection c
 
   -- Same names, but different APIs (without Maybe)
   , alterAt :: forall a. Int -> (a -> Maybe a) -> c a -> c a
